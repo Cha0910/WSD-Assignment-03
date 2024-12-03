@@ -1,0 +1,1482 @@
+openapi: 3.0.0
+info:
+  title: API Documentation
+  version: 1.0.0
+paths:
+  /auth/register:
+    post:
+      summary: Register User
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "example@email.com"
+                  description: "The user's email address"
+                password:
+                  type: string
+                  format: password
+                  example: "yourpassword"
+                  description: "The user's password"
+                name:
+                  type: string
+                  format: name
+                  example: "yourname"
+                  description: "The user's name"
+              required:
+                - email
+                - password
+                - name
+      responses:
+        201:
+          description: Success
+
+  /auth/login:
+    post:
+      summary: User Login
+      description: >
+        Authenticates the user with their email and password. After a successful login, you'll receive an `access_token`. 
+        
+        
+        **Steps:**
+        
+        
+        1. Copy the `access_token` from the response.
+        
+        2. Click the 'Authorize' button in the top-right corner.
+        
+        3. Enter the token in the format `<your_access_token>`
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "example@email.com"
+                  description: "The user's email address"
+                password:
+                  type: string
+                  format: password
+                  example: "yourpassword"
+                  description: "The user's password"
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Login successful"
+        '400':
+          description: Missing request data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: "Required data is missing."
+        '401':
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: "Invalid credentials."
+
+  /auth/refresh:
+    post:
+      summary: Refresh access token
+      description: This endpoint generates a new access token using a valid refresh token.
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+                  description: The refresh token provided during login.
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      responses:
+        200:
+          description: Tokens have been refreshed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Tokens have been refreshed.
+                  access_token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  refresh_token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        401:
+          description: Invalid or expired refresh token.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Invalid refresh token.
+
+  /auth/profile:
+    put:
+      summary: Update user profile
+      description: Updates the user's password and/or name. Requires JWT authentication.
+      tags:
+        - Auth
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  description: New password (Base64 encoded).
+                name:
+                  type: string
+                  description: New name of the user.
+              example:
+                password: new_password123
+                name: new_name
+      responses:
+        '200':
+          description: Profile successfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: User information has been successfully updated.
+        '400':
+          description: Missing or invalid data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Invalid refresh token
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Internal server error
+
+  /auth/info:
+    get:
+      summary: Get User Info
+      description: Retrieves the profile information of the currently authenticated user.
+      tags:
+        - Auth
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      email:
+                        type: string
+                        example: example@email.com
+                      name:
+                        type: string
+                        example: John Doe
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                      last_login:
+                        type: string
+                        format: date-time
+                        example: 2024-12-01T11:00:00Z
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: User not found.
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Internal server error
+
+  /auth/delete:
+    delete:
+      summary: Delete User Account
+      description: Deletes the account of the currently authenticated user.
+      tags:
+        - Auth
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Successful deletion
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Account has been successfully deleted.
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Internal server error
+  /jobs:
+    get:
+      summary: Get paginated list of jobs
+      description: Fetch a paginated list of jobs sorted by ID in ascending order.
+      tags:
+        - Jobs
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number for pagination.
+        - in: query
+          name: page_size
+          schema:
+            type: integer
+            default: 20
+          description: Number of items per page.
+      responses:
+        200:
+          description: Successful response with jobs data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        title:
+                          type: string
+                        company_name:
+                          type: string
+                        salary:
+                          type: string
+                        deadline:
+                          type: string
+                          format: date
+                  pagination:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                      per_page:
+                        type: integer
+        500:
+          description: Server error
+
+    post:
+      summary: Create a new job
+      description: Create a new job with the given details.
+      tags:
+        - Jobs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: Software Engineer
+                company:
+                  type: string
+                  example: Example Corp
+                company_link:
+                  type: string
+                  example: https://example.com
+                location:
+                  type: string
+                  example: example location
+                salary:
+                  type: string
+                  example: 6000
+                career:
+                  type: string
+                  example: example career
+                education:
+                  type: string
+                  example: example education
+                employment:
+                  type: string
+                  example: example employment
+                deadline:
+                  type: string
+                  format: date
+                  example: 2024-12-31
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  example: ["example tag"]
+                link:
+                  type: string
+                  example: https://jobportal.com/job123
+      responses:
+        201:
+          description: Job created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Job created successfully
+                  job_id:
+                    type: integer
+                    example: 1
+        400:
+          description: Validation error
+        500:
+          description: Server error
+
+  /jobs/{job_id}:
+    get:
+      summary: Get job details
+      description: Retrieve detailed information about a specific job, including its company, location, and tags.
+      tags:
+        - Jobs
+      parameters:
+        - name: job_id
+          in: path
+          description: The ID of the job to retrieve
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Successfully retrieved job details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      title:
+                        type: string
+                        example: Backend Developer
+                      salary:
+                        type: string
+                        example: 1000000
+                      career:
+                        type: string
+                        example: 3 years
+                      education:
+                        type: string
+                        example: Bachelor's
+                      employment:
+                        type: string
+                        example: Full-time
+                      deadline:
+                        type: string
+                        format: date
+                        example: 2024-12-31
+                      link:
+                        type: string
+                        example: http://job.example.com/1
+                      company:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            example: Tech Corp
+                          link:
+                            type: string
+                            example: http://techcorp.example.com
+                      location:
+                        type: object
+                        properties:
+                          region:
+                            type: string
+                            example: Seoul
+                          district:
+                            type: string
+                            example: Gangnam-gu
+                      tags:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                          - Backend
+                          - Python
+                          - Django
+        404:
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Job not found
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Internal server error
+    put:
+      summary: Update an existing job
+      description: Update details of an existing job posting by ID.
+      tags:
+        - Jobs
+      parameters:
+        - in: path
+          name: job_id
+          required: true
+          schema:
+            type: integer
+          description: ID of the job to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: example new title
+                company:
+                  type: string
+                  example: example new company name
+                company_link:
+                  type: string
+                  example: http://newcompany.example.com
+                location:
+                  type: string
+                  example: example new location
+                salary:
+                  type: string
+                  example: example new salary
+                career:
+                  type: string
+                  example: example new career
+                education:
+                  type: string
+                  example: example new education
+                employment:
+                  type: string
+                  example: example new employment
+                deadline:
+                  type: string
+                  format: date
+                  example: 2024-12-31
+                tags:
+                  type: array
+                  items:
+                    type: string
+                    example: ['example new tag']
+                link:
+                  type: string
+                  example: http://newjob.example.com/1
+      responses:
+        200:
+          description: Job updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Job updated successfully
+        400:
+          description: Validation error
+        404:
+          description: Job not found
+        500:
+          description: Server error
+
+    delete:
+      summary: Delete a job
+      description: Deletes a job posting by ID and all its related data.
+      tags:
+        - Jobs
+      parameters:
+        - in: path
+          name: job_id
+          required: true
+          schema:
+            type: integer
+          description: ID of the job to delete
+      responses:
+        200:
+          description: Job deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Job deleted successfully
+        404:
+          description: Job not found
+        500:
+          description: Server error
+
+  /jobs/search:
+    get:
+      summary: Search jobs by keyword
+      description: Search for jobs using a keyword. The keyword will be matched against job title, company name, and description.
+      tags:
+        - Jobs
+      parameters:
+        - in: query
+          name: keyword
+          required: true
+          schema:
+            type: string
+          description: The keyword to search for
+        - in: query
+          name: page
+          schema:
+            default: 1
+            type: integer
+          description: Page number for pagination
+        - in: query
+          name: per_page
+          schema:
+            default: 20
+            type: integer
+          description: Number of results per page
+      responses:
+        200:
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        title:
+                          type: string
+                        company_name:
+                          type: string
+                        salary:
+                          type: string
+                        deadline:
+                          type: string
+                          format: date
+        400:
+          description: Validation error
+        500:
+          description: Server error
+
+  /jobs/filter:
+    get:
+      summary: Filter jobs by location and tags
+      description: Filter jobs by location and tags. At least one location or tag must be provided.
+      tags:
+        - Jobs
+      parameters:
+        - in: query
+          name: location
+          schema:
+            type: array
+            items:
+              type: string
+            description: List of locations to filter by
+        - in: query
+          name: tag
+          schema:
+            type: array
+            items:
+              type: string
+            description: List of tags to filter by
+        - in: query
+          name: page
+          schema:
+            default: 1
+            type: integer
+          description: Page number for pagination
+        - in: query
+          name: per_page
+          schema:
+            default: 20
+            type: integer
+          description: Number of results per page
+      responses:
+        200:
+          description: Filter results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        title:
+                          type: string
+                        company_name:
+                          type: string
+                        salary:
+                          type: string
+                        deadline:
+                          type: string
+                          format: date
+        400:
+          description: Validation error
+        500:
+          description: Server error
+
+  /jobs/sort:
+    get:
+      summary: Sort jobs by deadline
+      description: Sort jobs by their deadline in ascending or descending order.
+      tags:
+        - Jobs
+      parameters:
+        - in: query
+          name: order
+          schema:
+            type: string
+            enum: [asc, desc]
+            description: Order to sort the jobs by (ascending or descending)
+        - in: query
+          name: page
+          schema:
+            default: 1
+            type: integer
+          description: Page number for pagination
+        - in: query
+          name: per_page
+          schema:
+            default: 20
+            type: integer
+          description: Number of results per page
+      responses:
+        200:
+          description: Sorted results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        title:
+                          type: string
+                        company_name:
+                          type: string
+                        salary:
+                          type: string
+                        deadline:
+                          type: string
+                          format: date
+        400:
+          description: Validation error
+        500:
+          description: Server error
+
+  /applications:
+    post:
+      summary: Apply for a job
+      description: Allows a user to apply for a job with an optional resume link and cover letter.
+      tags:
+        - Applications
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                job_id:
+                  type: integer
+                  description: ID of the job to apply for.
+                  example: 123
+                resume_link:
+                  type: string
+                  description: Link or content of the user's resume (optional).
+                  example: "https://example.com/resume.pdf"
+              required:
+                - job_id
+      responses:
+        '201':
+          description: Application submitted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Application submitted successfully.
+        '400':
+          description: Bad request or validation error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Job ID is required.
+        '404':
+          description: Job not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Job not found.
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Internal server error.
+    get:
+      summary: Retrieve job applications
+      description: Retrieve job applications with filtering, sorting, and pagination.
+      tags:
+        - Applications
+      parameters:
+        - in: query
+          name: user_id
+          required: true
+          schema:
+            type: integer
+          description: ID of the user whose applications are to be retrieved.
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+          description: Status of the application (e.g., 'pending', 'accepted', 'rejected', 'canceled').
+        - in: query
+          name: order
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+          description: Sort order by application date ('asc' or 'desc').
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            default: 1
+          description: Page number.
+        - in: query
+          name: per_page
+          required: false
+          schema:
+            type: integer
+            default: 20
+          description: Number of items per page.
+      responses:
+        '200':
+          description: Applications retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        user_id:
+                          type: integer
+                        job_id:
+                          type: integer
+                        title:
+                          type: string
+                        resume_id:
+                          type: integer
+                        status:
+                          type: string
+                        applied_at:
+                          type: string
+                          format: date-time
+                  pagination:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                      per_page:
+                        type: integer
+                      total_items:
+                        type: integer
+
+  /applications/{application_id}:
+    delete:
+      summary: Cancel a job application
+      description: Change the status of a job application to 'canceled'. Only pending applications can be canceled.
+      tags:
+        - Applications
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: application_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: The ID of the application to cancel.
+      responses:
+        '200':
+          description: Application status updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: "Application status updated to 'canceled'."
+        '400':
+          description: Only pending applications can be canceled.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: "Only pending applications can be canceled."
+        '404':
+          description: Application not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: "Application not found."
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: "Internal server error."
+
+  /bookmarks:
+    post:
+      summary: Toggle a job bookmark
+      description: Adds or removes a bookmark for the authenticated user.
+      tags:
+        - Bookmarks
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                job_id:
+                  type: integer
+                  description: ID of the job to bookmark or remove.
+                  example: 123
+      responses:
+        '201':
+          description: Bookmark added successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Bookmark added.
+        '200':
+          description: Bookmark removed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Bookmark removed.
+        '400':
+          description: Job ID is missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Job ID is required.
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Internal server error.
+
+    get:
+      summary: Get a list of bookmarks
+      description: Retrieves the list of jobs bookmarked by a user, sorted by the latest bookmarks first, with pagination.
+      tags:
+        - Bookmarks
+      parameters:
+        - name: user_id
+          in: query
+          description: ID of the user whose bookmarks are being retrieved.
+          required: true
+          schema:
+            type: integer
+          example: 123
+        - name: page
+          in: query
+          description: Page number for pagination.
+          required: false
+          schema:
+            type: integer
+          example: 1
+        - name: per_page
+          in: query
+          description: Number of items per page.
+          required: false
+          schema:
+            type: integer
+          example: 20
+      responses:
+        '200':
+          description: List of bookmarks retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        bookmark_id:
+                          type: integer
+                          example: 1
+                        user_id:
+                          type: integer
+                          example: 123
+                        job_id:
+                          type: integer
+                          example: 456
+                        title:
+                          type: string
+                          example: Backend Developer
+                        company_name:
+                          type: string
+                          example: ABC Corp
+                        salary:
+                          type: string
+                          example: $60,000
+                        deadline:
+                          type: string
+                          format: date
+                          example: 2024-12-31
+                  pagination:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      per_page:
+                        type: integer
+                        example: 20
+                      total_items:
+                        type: integer
+                        example: 50
+        '400':
+          description: Missing or invalid query parameters.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: User ID is required.
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Internal server error.
+
+  /resumes:
+    post:
+      summary: Create a resume
+      description: Creates a new resume for the authenticated user.
+      tags:
+        - Resumes
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                resume_link:
+                  type: string
+                  description: The link to the resume file.
+                  example: "https://example.com/resume.pdf"
+      responses:
+        201:
+          description: Resume created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Resume created successfully
+                  resume_id:
+                    type: integer
+                    example: 1
+        400:
+          description: Missing required fields
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Resume Link is required
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Internal server error
+
+    get:
+      summary: Get all resumes
+      description: Retrieves all resumes for the authenticated user with pagination support.
+      tags:
+        - Resumes
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+          description: The page number for pagination.
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+          description: The number of resumes per page.
+      responses:
+        200:
+          description: List of resumes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        resume_link:
+                          type: string
+                          example: "https://example.com/resume.pdf"
+                        created_at:
+                          type: string
+                          format: date-time
+                          example: "2024-12-03T12:34:56"
+                  pagination:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      per_page:
+                        type: integer
+                        example: 20
+                      total_items:
+                        type: integer
+                        example: 3
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Internal server error
+
+  /resumes/{resume_id}:
+    put:
+      summary: Update a resume
+      description: Updates the resume link of a specific resume for the authenticated user.
+      tags:
+        - Resumes
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: resume_id
+          in: path
+          required: true
+          description: The ID of the resume to update.
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                resume_link:
+                  type: string
+                  description: The new link to the resume file.
+                  example: "https://example.com/updated-resume.pdf"
+      responses:
+        200:
+          description: Resume updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Resume updated successfully
+        400:
+          description: No fields to update provided
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: No fields to update provided
+        404:
+          description: Resume not found or unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Resume not found or unauthorized
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Internal server error
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
