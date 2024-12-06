@@ -332,15 +332,15 @@ def update_job(job_id):
     education = data.get('education')
     employment = data.get('employment')
     deadline = data.get('deadline')
-    tags = data.get('tags', [])  # List of tags, default empty
+    input_tags = data.get('tags', [])  # List of tags, default empty
     job_link = data.get('link', None)
 
     # 최소 하나는 있어야 함
-    if not any([title, company_name, location, salary, career, education, employment, deadline, tags, job_link]):
+    if not any([title, company_name, location, salary, career, education, employment, deadline, input_tags, job_link]):
         return jsonify({"status": "error", "message": "No fields provided for update"}), 400
 
     connection = get_db_connection()
-    cursor = connection.cursor()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
 
     try:
         # Update fields dynamically
