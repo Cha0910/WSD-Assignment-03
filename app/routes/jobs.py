@@ -334,7 +334,7 @@ def update_job(job_id):
     deadline = data.get('deadline')
     input_tags = data.get('tags', [])  # List of tags, default empty
     job_link = data.get('link', None)
-
+    print(input_tags)
     # 최소 하나는 있어야 함
     if not any([title, company_name, location, salary, career, education, employment, deadline, input_tags, job_link]):
         return jsonify({"status": "error", "message": "No fields provided for update"}), 400
@@ -407,14 +407,18 @@ def update_job(job_id):
             connection.commit()
 
         # 태그 업데이트
-        if tags:
+        if input_tags:
+            print("Tags:", tags)  # `tags`는 딕셔너리이어야 합니다.
+            print("Type of tags:", type(tags))
+            print("Input Tags:", input_tags)  # `input_tags`는 리스트여야 합니다.
+            print("Type of input_tags:", type(input_tags))
             # 태그 초기화
             cursor.execute("DELETE FROM JobTags WHERE job_id = %s", (job_id,))
             connection.commit()
 
             # 새로운 태그 추가
             tag_ids = []
-            for tag in tags:
+            for tag in input_tags:
                 tag_id = tags.get(tag)
                 if not tag_id:
                     cursor.execute("INSERT INTO Tags (name) VALUES (%s)", (tag,))

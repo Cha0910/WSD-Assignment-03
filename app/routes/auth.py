@@ -45,7 +45,7 @@ def register():
         return jsonify({"status": "success",
                         "message": "User registered successfully.,",
                         "data": new_user,
-                        "refresh_token": refresh_token.decode('utf-8')
+                        "refresh_token": refresh_token
         }), 201
     except pymysql.IntegrityError:
         return jsonify({"status": "error", "message": "Email already exists."}), 400
@@ -92,8 +92,8 @@ def login():
 
             return jsonify({"status": "success",
                             "message": "Login successful.",
-                            "new_refresh_token": new_refresh_token.decode('utf-8'),
-                            "new_access_token": new_access_token.decode('utf-8')}), 200
+                            "new_refresh_token": new_refresh_token,
+                            "new_access_token": new_access_token}), 200
         else:
             return jsonify({"status": "error", "message": "Invalid credentials."}), 401
     finally:

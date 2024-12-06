@@ -624,7 +624,7 @@ paths:
                   type: array
                   items:
                     type: string
-                    example: ['example new tag']
+                    example: 'example new tag'
                 link:
                   type: string
                   example: http://newjob.example.com/1
