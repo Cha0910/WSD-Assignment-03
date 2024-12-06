@@ -1,12 +1,13 @@
 import pymysql
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import get_jwt_identity
 from app.utils.DB_Utils import get_db_connection
+from app.utils.jwt_token import jwt_required
 
 bp = Blueprint('applications', __name__, url_prefix='/applications')
 
 @bp.route('/', methods=['POST'])
-@jwt_required()
+@jwt_required
 def apply_for_job():
     data = request.json
     user_id = get_jwt_identity()  # JWT에서 사용자 ID 추출
@@ -66,8 +67,9 @@ def apply_for_job():
         connection.close()
 
 @bp.route('/', methods=['GET'])
+@jwt_required
 def get_applications():
-    user_id = request.args.get('user_id', type=int)
+    user_id = get_jwt_identity()  # JWT에서 사용자 ID 추출
     status = request.args.get('status', default=None, type=str)
     order = request.args.get('order', default='asc', type=str)  # 정렬 순서
     page = request.args.get('page', default=1, type=int)
@@ -129,7 +131,7 @@ def get_applications():
         connection.close()
 
 @bp.route('/<int:application_id>', methods=['DELETE'])
-@jwt_required()
+@jwt_required
 def cancel_application(application_id):
     user_id = get_jwt_identity()
 

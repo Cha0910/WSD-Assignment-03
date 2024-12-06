@@ -3,10 +3,10 @@ import base64
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import (
     create_access_token,
-    jwt_required, get_jwt_identity, get_jwt
+    get_jwt_identity, get_jwt
 )
 from app.utils.DB_Utils import get_db_connection
-from app.utils.jwt_token import create_refresh_token, decode_token, REFRESH_SECRET_KEY
+from app.utils.jwt_token import create_refresh_token, decode_refresh_token, REFRESH_SECRET_KEY, jwt_required
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 # 회원가입
@@ -111,7 +111,7 @@ def refresh_token():
 
     try:
         # Refresh Token 검증
-        decoded = decode_token(refresh_token, REFRESH_SECRET_KEY)
+        decoded = decode_refresh_token(refresh_token, REFRESH_SECRET_KEY)
         user_id = decoded.get("user_id")
 
         # 데이터베이스에 Refresh Token이 존재하는지 확인
@@ -135,7 +135,7 @@ def refresh_token():
 
 
 @bp.route('/profile', methods=['PUT'])
-@jwt_required()  # JWT 인증 필요
+@jwt_required  # JWT 인증 필요
 def update_profile():
     data = request.json
     user_id = get_jwt_identity()  # 현재 로그인된 사용자의 ID
@@ -184,7 +184,7 @@ def update_profile():
 
 
 @bp.route('/info', methods=['GET'])
-@jwt_required()  # JWT 인증 필요
+@jwt_required  # JWT 인증 필요
 def get_info():
     user_id = get_jwt_identity()  # 현재 로그인된 사용자의 ID
 
@@ -228,7 +228,7 @@ def get_info():
         connection.close()
 
 @bp.route('/delete', methods=['DELETE'])
-@jwt_required()  # JWT 인증 필요
+@jwt_required  # JWT 인증 필요
 def delete_account():
     user_id = get_jwt_identity()  # 현재 로그인된 사용자의 ID
 

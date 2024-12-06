@@ -2,10 +2,12 @@ import pymysql
 from flask import Blueprint, request, jsonify
 from app.utils.DB_Utils import get_db_connection
 from ..utils.DB_Ids import locations, tags
+from app.utils.jwt_token import jwt_required
 
 bp = Blueprint('jobs', __name__, url_prefix='/jobs')
 
 @bp.route('/', methods=['GET'])
+@jwt_required
 def get_jobs():
     page = request.args.get('page', default=1, type=int)  # 기본값 1
     page_size = request.args.get('page_size', default=20, type=int)  # 기본값 20
@@ -41,6 +43,7 @@ def get_jobs():
 
 
 @bp.route('/search', methods=['GET'])
+@jwt_required
 def search_jobs():
     keyword = request.args.get('keyword', default=None, type=str)
     page = request.args.get('page', default=1, type=int) # 기본 값 1
@@ -87,6 +90,7 @@ def search_jobs():
         connection.close()
 
 @bp.route('/filter', methods=['GET'])
+@jwt_required
 def filter_jobs():
     query_locations = request.args.getlist('location')  # 여러 개의 location 값 처리
     query_tags = request.args.getlist('tag')  # 여러 개의 tag 값 처리
@@ -185,6 +189,7 @@ def filter_jobs():
         connection.close()
 
 @bp.route('/sort', methods=['GET'])
+@jwt_required
 def sort_jobs():
     order = request.args.get('order', default='asc')  # 정렬 순서 (asc 또는 desc)
     page = request.args.get('page', default=1, type=int)  # 기본 값 1
@@ -234,6 +239,7 @@ def sort_jobs():
         connection.close()
 
 @bp.route('/', methods=['POST'])
+@jwt_required
 def create_job():
     data = request.json
 
@@ -312,6 +318,7 @@ def create_job():
         connection.close()
 
 @bp.route('/<int:job_id>', methods=['PUT'])
+@jwt_required
 def update_job(job_id):
     data = request.json
 
@@ -431,6 +438,7 @@ def update_job(job_id):
         connection.close()
 
 @bp.route('/<int:job_id>', methods=['DELETE'])
+@jwt_required
 def delete_job(job_id):
     connection = get_db_connection()
     cursor = connection.cursor()
@@ -468,6 +476,7 @@ def delete_job(job_id):
         connection.close()
 
 @bp.route('/<int:job_id>', methods=['GET'])
+@jwt_required
 def get_job_detail(job_id):
     connection = get_db_connection()
     cursor = connection.cursor(pymysql.cursors.DictCursor)

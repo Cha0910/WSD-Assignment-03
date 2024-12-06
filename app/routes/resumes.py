@@ -1,13 +1,14 @@
 import pymysql
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import get_jwt_identity
 from app.utils.DB_Utils import get_db_connection
+from app.utils.jwt_token import jwt_required
 
 bp = Blueprint('resumes', __name__, url_prefix='/resumes')
 
 # 이력서 생성
 @bp.route('/', methods=['POST'])
-@jwt_required()
+@jwt_required
 def create_resume():
     data = request.json
     user_id = get_jwt_identity()
@@ -46,7 +47,7 @@ def create_resume():
 
 # 이력서 조회
 @bp.route('/', methods=['GET'])
-@jwt_required()
+@jwt_required
 def get_resumes():
     user_id = get_jwt_identity()
     page = request.args.get('page', default=1, type=int)
@@ -90,7 +91,7 @@ def get_resumes():
 
 # 이력서 수정
 @bp.route('/<int:resume_id>', methods=['PUT'])
-@jwt_required()
+@jwt_required
 def update_resume(resume_id):
     data = request.json
     user_id = get_jwt_identity()

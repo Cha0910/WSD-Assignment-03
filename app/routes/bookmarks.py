@@ -1,13 +1,14 @@
 import pymysql
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import get_jwt_identity
 from app.utils.DB_Utils import get_db_connection
+from app.utils.jwt_token import jwt_required
 
 bp = Blueprint('bookmarks', __name__, url_prefix='/bookmarks')
 
 # 북마크 추가/제거
 @bp.route('/', methods=['POST'])
-@jwt_required()
+@jwt_required
 def toggle_bookmark():
     user_id = get_jwt_identity()
     data = request.json
@@ -53,8 +54,9 @@ def toggle_bookmark():
         connection.close()
 
 @bp.route('/', methods=['GET'])
+@jwt_required
 def get_bookmarks():
-    user_id = request.args.get('user_id', type=int)
+    user_id = get_jwt_identity()  # JWT에서 사용자 ID 추출
     page = request.args.get('page', default=1, type=int)
     per_page = request.args.get('per_page', default=20, type=int)
 
