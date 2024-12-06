@@ -123,7 +123,7 @@ def filter_jobs():
         if tag_name in query_tags
     ]
 
-    if not location_ids or not tag_ids:
+    if not location_ids and not tag_ids:
         return jsonify({
             "status": "success",
             "data": [],
