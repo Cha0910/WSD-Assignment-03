@@ -9,7 +9,7 @@ def get_db_connection():
     """
     DB_CONFIG = {
         "host": "127.0.0.1",  # 클라우드 로컬 IP
-        "port": 3306,  # 포트
+        "port": 8080,  # 포트
         "user": "WSD_03",  # 사용자 이름
         "password": "03_Assignment",  # 비밀번호
         "database": "WSD_03_DB"  # 데이터베이스 이름
