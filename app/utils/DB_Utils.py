@@ -1,4 +1,12 @@
 import pymysql
+import os
+from dotenv import load_dotenv
+
+# Load .env file
+load_dotenv()
+
+
+# Database Configuration
 
 def get_db_connection():
     """
@@ -8,11 +16,11 @@ def get_db_connection():
         connection: pymysql 연결 객체
     """
     DB_CONFIG = {
-        "host": "113.198.66.75",  # 클라우드 서버 IP
-        "port": 10033,  # 포트
-        "user": "WSD_03",  # 사용자 이름
-        "password": "03_Assignment",  # 비밀번호
-        "database": "WSD_03_DB"  # 데이터베이스 이름
+        "host": os.getenv('DB_HOST'),
+        "port": int(os.getenv('DB_PORT')),
+        "user": os.getenv('DB_USER'),
+        "password": os.getenv('DB_PASSWORD'),
+        "database": os.getenv('DB_NAME')
     }
     try:
         connection = pymysql.connect(**DB_CONFIG)

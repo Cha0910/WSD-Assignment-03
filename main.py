@@ -3,17 +3,19 @@ from flask import Flask
 from app.routes import auth, jobs, applications, bookmarks, resumes
 from flask_swagger_ui import get_swaggerui_blueprint
 from flask_jwt_extended import JWTManager
+import os
+from dotenv import load_dotenv
 
 SWAGGER_URL = '/swagger'
 API_URL = '/swagger.yaml'
-
+load_dotenv()
 app = Flask(__name__)
 
 
 swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL)
 app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
-app.config['JWT_SECRET_KEY'] = 'WSD_Assignment-03'  # JWT 서명 키
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')  # JWT 서명 키
 app.config['JWT_TOKEN_LOCATION'] = ['headers']  # 토큰을 받는 위치
 app.config['JWT_HEADER_NAME'] = 'Authorization'
 app.config['JWT_HEADER_TYPE'] = 'Bearer'

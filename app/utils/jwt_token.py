@@ -6,9 +6,13 @@ from flask import jsonify, request
 from flask_jwt_extended import (
     get_jwt_identity, verify_jwt_in_request, decode_token
 )
+import os
+from dotenv import load_dotenv
 
-SECRET_KEY = "WSD_Assignment-03"
-REFRESH_SECRET_KEY = "202011745-cjh"
+load_dotenv()
+
+SECRET_KEY = os.getenv('SECRET_KEY')
+REFRESH_SECRET_KEY = os.getenv('REFRESH_SECRET_KEY')
 
 def create_access_token(user_id):
     payload = {
